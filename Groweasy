@@ -1,1 +1,297 @@
+Create a New Next.js Project with TypeScript
+
+npx create-next-app@latest my-nextjs-app --typescript
+cd my-nextjs-app
+npm run dev
+
+Install Additional Dependencies
+
+npm install @mui/material @emotion/react @emotion/styled
+
+Define a JSON List for Ad Banners
+
+Create a file named adBanners.json in the
+
+[
+  {
+    "id": 1,
+    "title": "Ad Banner 1",
+    "description": "This is the description for Ad Banner 1.",
+    "cta": "Click Here",
+    "image": "/images/banner1.jpg",
+    "background": "#FF5733"
+  },
+  {
+    "id": 2,
+    "title": "Ad Banner 2",
+    "description": "This is the description for Ad Banner 2.",
+    "cta": "Learn More",
+    "image": "/images/banner2.jpg",
+    "background": "#33FF57"
+  }
+]
+
+Create the Ad Banner Component
+
+We'll create a reusable component named BannerImageComp.tsx to display the ad banners.
+
+// components/BannerImageComp.tsx
+
+import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+
+interface BannerProps {
+  id: number;
+  title: string;
+  description: string;
+  cta: string;
+  image: string;
+  background: string;
+  onEdit: (id: number) => void;
+}
+
+const BannerImageComp: React.FC<BannerProps> = ({
+  id,
+  title,
+  description,
+  cta,
+  image,
+  background,
+  onEdit,
+}) => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 2,
+        background,
+        color: '#fff',
+        borderRadius: 2,
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        width: '100%',
+        maxWidth: 600,
+        margin: 'auto',
+        mt: 4,
+      }}
+    >
+      <img
+        src={image}
+        alt={title}
+        style={{
+          width: '100%',
+          height: 'auto',
+          borderRadius: 'inherit',
+          objectFit: 'cover',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 2,
+          transition: 'opacity 0.3s',
+          opacity: 0,
+          '&:hover': {
+            opacity: 1,
+          },
+        }}
+      >
+        <Typography variant="h5" component="h2" gutterBottom>
+          {title}
+        </Typography>
+        <Typography variant="body1" component="p" gutterBottom>
+          {description}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => alert(`CTA Clicked for ${title}`)}
+        >
+          {cta}
+        </Button>
+        <EditIcon
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            cursor: 'pointer',
+          }}
+          onClick={() => onEdit(id)}
+        />
+      </Box>
+    </Box>
+  );
+};
+
+export default BannerImageComp;
+
+Implementing the Edit Functionality
+Create the Bottom Sheet Edit Component
+
+We'll create a component named EditBannerTemplateBs.tsx to handle the editing of ad banners.
+
+// components/EditBannerTemplateBs.tsx
+
+import React, { useState, ChangeEvent } from 'react';
+import { Box, Typography, Button, TextField, Modal } from '@mui/material';
+
+interface EditBannerProps {
+  open: boolean;
+  onClose: () => void;
+  banner: {
+    id: number;
+    title: string;
+    description: string;
+    cta: string;
+    image: string;
+    background: string;
+  };
+  onSave: (updatedBanner: any) => void;
+}
+
+const EditBannerTemplateBs: React.FC<EditBannerProps> = ({
+  open,
+  onClose,
+  banner,
+  onSave,
+}) => {
+  const [updatedBanner, setUpdatedBanner] = useState(banner);
+
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setUpdatedBanner({ ...updatedBanner, [name]: value });
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="edit-banner-modal"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 2,
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: '#fff',
+          borderRadius: 2,
+          padding: 3,
+          width: '100%',
+          maxWidth: 400,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+        }}
+      >
+        <Typography variant="h6" component="h2" gutterBottom>
+          Edit Ad Banner
+        </Typography>
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Title"
+          name="title"
+          value={updatedBanner.title}
+          onChange={handleInputChange}
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Description"
+          name="description"
+          value={updatedBanner.description}
+          onChange={handleInputChange}
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="CTA"
+          name="cta"
+          value={updatedBanner.cta}
+          onChange={handleInputChange}
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Image URL"
+          name="image"
+          value={updatedBanner.image}
+          onChange={handleInputChange}
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Background Color"
+          name="background"
+          value={updatedBanner.background}
+          onChange={handleInputChange}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button onClick={onClose} color="secondary" sx={{ mr: 2 }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => onSave(updatedBanner)}
+          >
+            Save
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+};
+
+export default EditBannerTemplateBs;
+
+Integrating Components in the Home Page
+Set Up the Home Page
+
+We'll integrate these components into the pages/index.tsx file to display and edit ad banners.
+
+// pages/index.tsx
+
+import { useState } from 'react';
+import { Box, Container } from '@mui/material';
+import BannerImageComp from '../components/BannerImageComp';
+import EditBannerTemplateBs from '../components/EditBannerTemplateBs';
+import adBanners from '../public/adBanners.json';
+
+interface AdBanner {
+  id: number;
+  title: string;
+  description: string;
+  cta: string;
+  image: string;
+  background: string;
+}
+
+const Home: React.FC = () => {
+  const [banners, setBanners] = useState<AdBanner[]>(adBanners);
+  const [selectedBanner, setSelectedBanner] = useState<AdBanner | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEdit = (id: number) => {
+    const banner = banners.find((b) => b.id === id);
+    if (banner) {
+      set
+
 
